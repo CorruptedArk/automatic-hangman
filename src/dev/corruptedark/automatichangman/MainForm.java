@@ -15,6 +15,9 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class MainForm {
@@ -64,7 +67,11 @@ public class MainForm {
     private final String PLAYER_WINS = "Player wins!";
     private final String PLAYER_LOSES = "Player loses!";
 
+    ExecutorService executorService;
+
     public MainForm() {
+
+        executorService = Executors.newCachedThreadPool();
 
         rand = new Random();
         dictionary = new ArrayList<>();
@@ -137,12 +144,6 @@ public class MainForm {
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
 
-                for(int i = 0; i < solutionLetterSpaces.size(); i++)
-                {
-                    solutionLetterSpaces.get(i).setText(FILLER);
-                    solutionLetterSpaces.get(i).setVisible(false);
-                }
-
                 if(!playerIsHuman)
                 {
                     guessList = "";
@@ -159,6 +160,7 @@ public class MainForm {
                     solutionField.setEditable(false);
                     nextGuessField.setEditable(true);
                     hideBody();
+                    clear();
                 }
             }
         });
@@ -203,6 +205,7 @@ public class MainForm {
                     solutionField.setEchoChar(MASK);
                 }
 
+                gameStarted = false;
                 solutionField.setText(dictionary.get(rand.nextInt(dictionary.size())));
             }
         });
@@ -212,24 +215,7 @@ public class MainForm {
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
 
-                gameStarted = false;
-                gameOver = false;
-                playerWins = false;
-
-                winLossLabel.setVisible(false);
-
-                solutionField.setText("");
-                correctGuesses = "";
-                guessList = "";
-                guessesField.setText("");
-
-                hideBody();
-
-                for(int i = 0; i < solutionLetterSpaces.size(); i++)
-                {
-                    solutionLetterSpaces.get(i).setText(FILLER);
-                    solutionLetterSpaces.get(i).setVisible(false);
-                }
+                clear();
             }
         });
         confirmButton.addMouseListener(new MouseAdapter() {
@@ -237,32 +223,45 @@ public class MainForm {
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
 
-                hideBody();
-
-                gameStarted = true;
-                gameOver = false;
-                playerWins = false;
-                winLossLabel.setVisible(false);
-                correctGuesses = "";
-                guessList = "";
-
-                solution = solutionField.getText();
-
-                guessesField.setText("");
-
-                for(int i = 0; i < solutionLetterSpaces.size(); i++)
+                if(!gameStarted && (!playerIsHuman || (playerIsHuman && solutionField.getEchoChar() != NO_MASK)))
                 {
-                    solutionLetterSpaces.get(i).setText(FILLER);
-                    solutionLetterSpaces.get(i).setVisible(false);
-                }
-                for (int i = 0; i < solution.length(); i++)
-                {
-                    solutionLetterSpaces.get(i).setVisible(true);
-                }
 
-                if(!playerIsHuman)
-                {
-                    playAsOptimalMachine();
+                    hideBody();
+
+                    gameStarted = true;
+                    gameOver = false;
+                    playerWins = false;
+                    winLossLabel.setVisible(false);
+                    correctGuesses = "";
+                    guessList = "";
+
+                    solution = solutionField.getText();
+
+                    guessesField.setText("");
+
+                    for (int i = 0; i < solutionLetterSpaces.size(); i++) {
+                        solutionLetterSpaces.get(i).setText(FILLER);
+                        solutionLetterSpaces.get(i).setVisible(false);
+                    }
+                    for (int i = 0; i < solution.length(); i++) {
+                        solutionLetterSpaces.get(i).setVisible(true);
+                    }
+
+                    if (!playerIsHuman) {
+                        Runnable optimalMachineRunnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                playAsOptimalMachine();
+                            }
+                        };
+
+                        if(executorService.isShutdown())
+                        {
+                            executorService = Executors.newSingleThreadExecutor();
+                        }
+
+                        executorService.execute(optimalMachineRunnable);
+                    }
                 }
             }
         });
@@ -297,7 +296,32 @@ public class MainForm {
         });
     }
 
-    private void setProbabilitesFromDictionary()
+    void clear()
+    {
+        executorService.shutdownNow();
+
+        gameStarted = false;
+        gameOver = false;
+        playerWins = false;
+
+        winLossLabel.setVisible(false);
+
+        solutionField.setText("");
+        correctGuesses = "";
+        guessList = "";
+        guessesField.setText("");
+        nextGuessField.setText("");
+
+        hideBody();
+
+        for(int i = 0; i < solutionLetterSpaces.size(); i++)
+        {
+            solutionLetterSpaces.get(i).setText(FILLER);
+            solutionLetterSpaces.get(i).setVisible(false);
+        }
+    }
+
+    private void setProbabilitiesFromDictionary()
     {
         double sum = 0;
         for (int i = 0; i < alphabet.length; i++)
@@ -332,30 +356,25 @@ public class MainForm {
     {
         subDictionary.clear();
 
-        for(int i = 0; i < dictionary.size(); i++)
-        {
-            if(dictionary.get(i).length() == solution.length())
-            {
+        for (int i = 0; i < dictionary.size(); i++) {
+            if (dictionary.get(i).length() == solution.length()) {
                 subDictionary.add(dictionary.get(i));
             }
         }
 
         int guessIndex;
-        while(!gameOver)
-        {
-            setProbabilitesFromDictionary();
+        while (!gameOver && !Thread.currentThread().isInterrupted()) {
+            setProbabilitiesFromDictionary();
             guessIndex = guessFromProbabilities(probabilities);
             nextGuessField.setText(alphabet[guessIndex]);
             filterDictionary(alphabet[guessIndex], isGuessCorrect(guessIndex));
             panel.invalidate();
-            panel.validate();
-            panel.repaint();
 
-            /*try {
+            try {
                 TimeUnit.MILLISECONDS.sleep(500);
             } catch (Exception e) {
-                e.printStackTrace();
-            }*/
+                Thread.currentThread().interrupt();
+            }
         }
     }
 
@@ -383,11 +402,13 @@ public class MainForm {
             winLossLabel.setVisible(true);
             solutionField.setEchoChar(NO_MASK);
             gameOver = true;
+            gameStarted = false;
             playerWins = false;
         }
         else if(hangmanStep > 6 || hangmanStep < 1)
         {
             gameOver = true;
+            gameStarted = false;
         }
 
     }
@@ -433,6 +454,7 @@ public class MainForm {
                     {
                         winLossLabel.setText(PLAYER_WINS);
                         winLossLabel.setVisible(true);
+                        gameStarted = false;
                     }
                 }
                 else
