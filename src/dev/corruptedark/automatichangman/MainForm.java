@@ -11,6 +11,7 @@ import java.awt.event.*;
 import java.awt.font.TextAttribute;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.List;
@@ -72,7 +73,8 @@ public class MainForm {
         probabilities = new ArrayList<>();
 
         try {
-            File wordsFile = new File(getClass().getClassLoader().getResource("words_alpha.txt").getFile());
+
+            InputStream wordsFile = getDictionaryStream();
             Scanner scan = new Scanner(wordsFile);
             while(scan.hasNextLine())
             {
@@ -260,7 +262,6 @@ public class MainForm {
 
                 if(!playerIsHuman)
                 {
-
                     playAsOptimalMachine();
                 }
             }
@@ -350,11 +351,11 @@ public class MainForm {
             panel.validate();
             panel.repaint();
 
-            try {
+            /*try {
                 TimeUnit.MILLISECONDS.sleep(500);
             } catch (Exception e) {
                 e.printStackTrace();
-            }
+            }*/
         }
     }
 
@@ -538,6 +539,20 @@ public class MainForm {
                 e.printStackTrace();
             }
         }
+    }
+
+    InputStream getDictionaryStream()
+    {
+        InputStream file = null;
+
+
+        try {
+            file = getClass().getClassLoader().getResourceAsStream("words_alpha.txt");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return file;
     }
 
     public static void main(String[] args) {
