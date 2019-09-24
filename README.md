@@ -6,6 +6,9 @@ A Java GUI application designed to play hangman better than a human can. It also
 I recommend cloning or downloading the project and opening it in Intellij IDE. I personally use the Community version, so I know it works.
 For other IDEs, I can't guarantee it will properly build or open the GUI forms.
 
+## On First Clone
+As of this commit, when you attempt to run from JAR, the executable will be missing. To fix this, simply build artifacts.
+
 ## Running Pre-built Executable
 Go to Releases on the repo and download the .jar file of your choice. If you have the newest Java installation it should run like any other Java application. 
 I'm currently not signing the executables, so download at your own risk. If you don't trust me, read the code and build from source instead.
