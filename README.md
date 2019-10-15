@@ -11,4 +11,7 @@ As of this commit, when you attempt to run from JAR, the executable will be miss
 
 ## Running Pre-built Executable
 Go to Releases on the repo and download the .jar file of your choice. If you have the newest Java installation it should run like any other Java application. 
-I'm currently not signing the executables, so download at your own risk. If you don't trust me, read the code and build from source instead.
+As of version 0.4, I am providing, signed jar files.
+My fingerprint is SHA256: 23:C2:9D:F6:D4:66:6D:3D:BE:31:3B:C1:F8:88:AC:A8:A0:10:36:C4:5F:FA:37:CF:7D:12:39:05:50:7A:69:03
+ 
+If you don't trust me, read the code and build from source instead.

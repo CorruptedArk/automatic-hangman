@@ -1,3 +1,21 @@
+/*
+ * Automatic Hangman is a program that functions both as a simple playable game of hangman and an AI that plays hangman.
+ *     Copyright (C) 2019  Noah Stanford <noahstandingford@gmail.com>
+ *
+ *     Automatic Hangman is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Automatic Hangman is distributed in the hope that it will be fun, interesting, and educational,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package dev.corruptedark.automatichangman;
 
 import org.apache.batik.swing.JSVGCanvas;
@@ -35,6 +53,7 @@ public class MainForm {
     private JSVGCanvas hangmanCanvas;
     private JPanel letterSpacesPanel;
     private JLabel winLossLabel;
+    private JButton aboutButton;
     private PlainDocument solutionDoc;
     private PlainDocument guessDoc;
     private FieldCharacterLimit guessCharacterLimit;
@@ -67,7 +86,9 @@ public class MainForm {
     private final String PLAYER_WINS = "Player wins!";
     private final String PLAYER_LOSES = "Player loses!";
 
-    ExecutorService executorService;
+    private ExecutorService executorService;
+
+    private AboutForm aboutForm;
 
     public MainForm() {
 
@@ -292,6 +313,22 @@ public class MainForm {
 
                     nextGuessField.setText("");
                 }
+            }
+        });
+        aboutButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+
+                if(aboutForm == null)
+                {
+                   aboutForm = new AboutForm();
+                }
+                else if(aboutForm.isDisplayable())
+                {
+                    aboutForm.setVisible(true);
+                }
+
             }
         });
     }
