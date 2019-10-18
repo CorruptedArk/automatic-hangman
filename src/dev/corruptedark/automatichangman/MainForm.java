@@ -19,21 +19,15 @@
 package dev.corruptedark.automatichangman;
 
 import org.apache.batik.swing.JSVGCanvas;
-import org.apache.xml.utils.URI;
 
 import javax.swing.*;
 import javax.swing.text.PlainDocument;
-import javax.swing.text.TextAction;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.font.TextAttribute;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.util.*;
 import java.util.List;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
